@@ -5,3 +5,4 @@
 /loadbeat
 /loadbeat.test
 *.pyc
+vendor/
