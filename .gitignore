@@ -5,3 +5,6 @@
 /loadbeat
 /loadbeat.test
 *.pyc
+
+data/
+logs/
