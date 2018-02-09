@@ -6,9 +6,15 @@ package config
 import "time"
 
 type Config struct {
-	Period time.Duration `config:"period"`
+	Compression    bool          `config:"compression.enabled"`
+	Keepalives     bool          `config:"keepalives.enabled"`
+	Redirects      bool          `config:"redirects.enabled"`
+	RequestTimeout time.Duration `config:"request_timeout"`
 }
 
 var DefaultConfig = Config{
-	Period: 1 * time.Second,
+	Compression:    true,
+	Keepalives:     true,
+	Redirects:      true,
+	RequestTimeout: 5 * time.Second,
 }

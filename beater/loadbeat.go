@@ -1,8 +1,7 @@
 package beater
 
 import (
-	"fmt"
-	"time"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -15,24 +14,26 @@ type Loadbeat struct {
 	done   chan struct{}
 	config config.Config
 	client beat.Client
+	logger *logp.Logger
 }
 
 // Creates beater
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
-	config := config.DefaultConfig
-	if err := cfg.Unpack(&config); err != nil {
-		return nil, fmt.Errorf("Error reading config file: %v", err)
+	c := config.DefaultConfig
+	if err := cfg.Unpack(&c); err != nil {
+		return nil, errors.Wrap(err, "error reading config file")
 	}
 
 	bt := &Loadbeat{
 		done:   make(chan struct{}),
-		config: config,
+		config: c,
+		logger: logp.NewLogger("loadbeat"),
 	}
 	return bt, nil
 }
 
 func (bt *Loadbeat) Run(b *beat.Beat) error {
-	logp.Info("loadbeat is running! Hit CTRL-C to stop it.")
+	bt.logger.Info("loadbeat is running! Hit CTRL-C to stop it.")
 
 	var err error
 	bt.client, err = b.Publisher.Connect()
@@ -40,26 +41,10 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	ticker := time.NewTicker(bt.config.Period)
-	counter := 1
-	for {
-		select {
-		case <-bt.done:
-			return nil
-		case <-ticker.C:
-		}
+	bt.logger.Infof("%+v", bt.config)
 
-		event := beat.Event{
-			Timestamp: time.Now(),
-			Fields: common.MapStr{
-				"type":    b.Info.Name,
-				"counter": counter,
-			},
-		}
-		bt.client.Publish(event)
-		logp.Info("Event sent")
-		counter++
-	}
+	<-bt.done
+	return nil
 }
 
 func (bt *Loadbeat) Stop() {
