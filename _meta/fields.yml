@@ -65,8 +65,8 @@
       required: true
       description: >
         true if a response was received
-    - name: error
+    - name: err
       type: string
-      required: true
+      required: false
       description: >
         Error(s) related to request

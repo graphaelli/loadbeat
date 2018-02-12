@@ -15,6 +15,7 @@ loadbeat:
   # How long to wait for a response for each request
   #request_timeout: 5s
 
+
 #================================ General =====================================
 
 # The name of the shipper that publishes the network data. It can be used to group

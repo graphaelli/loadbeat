@@ -3,5 +3,15 @@
 ############################# Loadbeat ######################################
 
 loadbeat:
-  # Defines how often an event is sent to the output
-  period: 1s
+  # compress requests
+  #compression.enabled: true
+
+  # enable HTTP keepalives
+  #keepalives.enabled: true
+
+  # follow redirects
+  #redirects.enabled: true
+
+  # How long to wait for a response for each request
+  #request_timeout: 5s
+
