@@ -277,12 +277,116 @@ None
 
 
 [float]
-=== `counter`
+=== `annotation`
 
-type: long
+required: False
+
+Annotation available for highlighting significant events during a load test
+
+
+[float]
+=== `method`
+
+type: keyword
 
 required: True
 
-PLEASE UPDATE DOCUMENTATION
+HTTP Request Method
+
+
+[float]
+=== `url`
+
+required: True
+
+HTTP Request URL
+
+
+[float]
+=== `bodysize`
+
+type: integer
+
+required: True
+
+HTTP Request Body size in bytes
+
+
+[float]
+== trace fields
+
+HTTP Trace details
+
+
+
+[float]
+=== `trace.connection`
+
+type: integer
+
+[float]
+=== `trace.dns`
+
+type: integer
+
+[float]
+=== `trace.request`
+
+type: integer
+
+[float]
+=== `trace.response`
+
+type: integer
+
+[float]
+=== `trace.server`
+
+type: integer
+
+[float]
+=== `trace.reused`
+
+type: boolean
+
+true if the connection was used previously
+
+
+[float]
+=== `code`
+
+type: integer
+
+required: True
+
+HTTP Response Code
+
+
+[float]
+=== `duration`
+
+type: float
+
+required: True
+
+Time from first byte sent to last byte returned
+
+
+[float]
+=== `complete`
+
+type: boolean
+
+required: True
+
+true if a response was received
+
+
+[float]
+=== `err`
+
+required: False
+
+Error(s) related to request
 
 

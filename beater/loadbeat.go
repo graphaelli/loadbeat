@@ -55,6 +55,7 @@ func getWork(c config.Config, handleResult func(*requester.Result)) ([]*requeste
 				DisableRedirects:   !c.Redirects,
 				C:                  t.Concurrent,
 				N:                  c.MaxRequests,
+				QPS:                t.Qps,
 				Timeout:            c.RequestTimeout,
 
 				HandleResult: handleResult,
@@ -122,6 +123,13 @@ func (bt *Loadbeat) handleResult(r *requester.Result) {
 	})
 }
 
+func (bt *Loadbeat) annotate(messages ...string) time.Time {
+	now := time.Now()
+	events := make([]beat.Event, len(messages))
+	bt.client.PublishAll(events)
+	return now
+}
+
 func (bt *Loadbeat) Run(b *beat.Beat) error {
 	bt.logger.Info("loadbeat is running! Hit CTRL-C to stop it.")
 
@@ -131,7 +139,12 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.logger.Debugf("%+v", bt.config)
+	descriptions := make([]string, len(bt.work))
+	for _, w := range bt.work {
+		descriptions = append(descriptions, w.String())
+	}
+	description := strings.Join(descriptions, "\n")
+	startTime := bt.annotate("start", description)
 
 	// start load generation workers
 	var wg sync.WaitGroup
@@ -156,7 +169,8 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		bt.Stop()
 		<-bt.done
 	}
-	bt.logger.Info("run complete")
+	endTime := bt.annotate("stop", description)
+	bt.logger.Infof("run complete after %.2f ms", float64(endTime.Sub(startTime).Nanoseconds())/1000.0)
 	return nil
 }
 

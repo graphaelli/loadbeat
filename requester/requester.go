@@ -5,7 +5,9 @@ Heavily borrowed from Apache 2.0 Licensed https://github.com/rakyll/hey.
 */
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -183,6 +185,16 @@ func (b *Work) runWorkers() {
 		}()
 	}
 	wg.Wait()
+}
+
+func (b *Work) String() string {
+	var gzBody bytes.Buffer
+	if len(b.RequestBody) > 0 {
+		zw := gzip.NewWriter(&gzBody)
+		zw.Write(b.RequestBody)
+		zw.Close()
+	}
+	return fmt.Sprintf("%s %s - %d (%d gz) bytes", b.Request.Method, b.Request.URL, len(b.RequestBody), len(gzBody.Bytes()))
 }
 
 // cloneRequest returns a clone of the provided *http.Request.

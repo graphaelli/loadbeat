@@ -2,8 +2,73 @@
   title: loadbeat
   description:
   fields:
-    - name: counter
-      type: long
+    - name: annotation
+      required: false
+      description: >
+        Annotation available for highlighting significant events during a load test
+    # request
+    - name: method
+      type: keyword
       required: true
       description: >
-        PLEASE UPDATE DOCUMENTATION
+        HTTP Request Method
+    - name: url
+      required: true
+      description: >
+        HTTP Request URL
+    - name: bodysize
+      type: integer
+      required: true
+      description: >
+        HTTP Request Body size in bytes
+    # request trace
+    - name: trace
+      type: group
+      required: false
+      description: >
+        HTTP Trace details
+      fields:
+        - name: connection
+          type: integer
+          descrption: >
+            HTTP request connection duration in ns
+        - name: dns
+          type: integer
+          descrption: >
+            HTTP request dns lookup duration in ns
+        - name: request
+          type: integer
+          descrption: >
+            HTTP request send duration in ns
+        - name: response
+          type: integer
+          descrption: >
+            HTTP response receive duration in ns
+        - name: server
+          type: integer
+          descrption: >
+            Time from last byte sent to first byte returned
+        - name: reused
+          type: boolean
+          description: >
+            true if the connection was used previously
+    # response
+    - name: code
+      type: integer
+      required: true
+      description: >
+        HTTP Response Code
+    - name: duration
+      type: float
+      required: true
+      description: >
+        Time from first byte sent to last byte returned
+    - name: complete
+      type: boolean
+      required: true
+      description: >
+        true if a response was received
+    - name: err
+      required: false
+      description: >
+        Error(s) related to request
