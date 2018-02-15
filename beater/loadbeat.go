@@ -123,14 +123,18 @@ func (bt *Loadbeat) handleResult(r *requester.Result) {
 	})
 }
 
-func (bt *Loadbeat) annotate(message string) time.Time {
+func (bt *Loadbeat) annotate(messages ...string) time.Time {
 	now := time.Now()
-	bt.client.Publish(beat.Event{
-		Timestamp: now,
-		Fields: common.MapStr{
-			"annotation": message,
-		},
-	})
+	events := make([]beat.Event, len(messages))
+	for i, m := range messages {
+		events[i] = beat.Event{
+			Timestamp: now,
+			Fields: common.MapStr{
+				"annotation": m,
+			},
+		}
+	}
+	bt.client.PublishAll(events)
 	return now
 }
 
@@ -143,12 +147,12 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	descriptions := make([]string, len(bt.work))
+	descriptions := make([]string, len(bt.work)+1)
+	descriptions[0] = "start"
 	for i, w := range bt.work {
-		descriptions[i] = w.String()
+		descriptions[i+1] = w.String()
 	}
-	description := strings.Join(descriptions, "\n")
-	startTime := bt.annotate("start\n" + description)
+	bt.annotate(descriptions...)
 
 	// start load generation workers
 	var wg sync.WaitGroup
@@ -173,8 +177,6 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		bt.Stop()
 		<-bt.done
 	}
-	endTime := bt.annotate("stop\n" + description)
-	bt.logger.Infof("run complete after %s", endTime.Sub(startTime))
 	return nil
 }
 
@@ -184,6 +186,7 @@ func (bt *Loadbeat) Stop() {
 	if bt.stopping {
 		return
 	}
+	bt.annotate("stop")
 	bt.stopping = true
 
 	// stop load generation workers
