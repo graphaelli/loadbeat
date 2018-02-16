@@ -1,0 +1,16 @@
+loadbeat:
+  targets:
+    - concurrent: 2
+      qps: 0.00000
+      method: POST
+      url: v1/client-side/transactions
+      headers:
+        - Content-Type:application/json
+      body: >
+        {"errors":[{"context":{"custom":{"superUseful":"info"},"environment":{"browserHeight":900,"browserWidth":1440,"language":"en-US","platform":"Linux x86_64","screenHeight":600,"screenWidth":800,"userAgent":"Chromeless 1.4.0"},"page":{"host":"opbeans-node","location":"http://opbeans-node:3000/dashboard","referer":""},"user":{"email":"user@opbeans.com","id":"id","username":"username"}},"culprit":"(inline script)","exception":{"message":"Uncaught Error: Test Error in dashboard","stacktrace":[{"abs_path":"http://opbeans-node:3000/dashboard","colno":461,"filename":"(inline script)","function":"generateError","lineno":1},{"abs_path":"http://opbeans-node:3000/dashboard","colno":549,"filename":"(inline script)","function":"\u003canonymous\u003e","lineno":1}],"type":"Error"},"id":"8c940656-97ac-442d-a03e-e53afe5cd58d","timestamp":"2018-01-23T02:32:20.225Z"}],"service":{"agent":{"name":"js-base","version":"0.3.0"},"language":{"name":"javascript"},"name":"opbeans-react","version":"v2018-01-11"}}
+
+    - concurrent: 1
+      qps: 1.00000
+      method: GET
+      url: healthcheck
+
