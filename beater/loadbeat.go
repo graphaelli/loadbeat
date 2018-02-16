@@ -106,7 +106,7 @@ func (bt *Loadbeat) handleResult(r *requester.Result) {
 		Fields: common.MapStr{
 			"method":   r.Request.Method,
 			"url":      r.Request.URL.RequestURI(),
-			"bodysize": r.ContentLength,
+			"bodysize": r.Request.ContentLength,
 			"trace": common.MapStr{
 				"connection": r.ConnDuration.Nanoseconds(),
 				"dns":        r.DnsDuration.Nanoseconds(),
@@ -115,10 +115,11 @@ func (bt *Loadbeat) handleResult(r *requester.Result) {
 				"server":     r.DelayDuration.Nanoseconds(),
 				"reused":     r.Reused,
 			},
-			"code":     r.StatusCode,
-			"duration": r.Duration,
-			"complete": r.Err == nil,
-			"err":      errStr,
+			"code":          r.StatusCode,
+			"contentlength": r.ContentLength,
+			"duration":      r.Duration,
+			"complete":      r.Err == nil,
+			"err":           errStr,
 		},
 	})
 }

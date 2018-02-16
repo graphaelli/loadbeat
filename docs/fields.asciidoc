@@ -363,6 +363,16 @@ HTTP Response Code
 
 
 [float]
+=== `contentlength`
+
+type: integer
+
+required: False
+
+HTTP Response Content Length
+
+
+[float]
 === `duration`
 
 type: float

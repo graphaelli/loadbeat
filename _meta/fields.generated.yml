@@ -58,6 +58,11 @@
       required: true
       description: >
         HTTP Response Code
+    - name: contentlength
+      type: integer
+      required: false
+      description: >
+        HTTP Response Content Length
     - name: duration
       type: float
       required: true
