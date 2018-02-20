@@ -1,11 +1,104 @@
 # Loadbeat
 
-Welcome to Loadbeat.
+Welcome to Loadbeat, an HTTP load generator utilizing the Elastic Stack to analyze results.
+
+## Using Loadbeat
+
+### Target load profile
+
+![Example Profile Response Codes](docs/img/responses-example-profile.png)
+
+Create a load profile in yaml, eg `config.yml`.
+
+This example will send `GET /health` no more than once per second and
+`POST /v1/user` no more than 10 times per second per each of 3 workers (~30 QPS):
+
+```yaml
+loadbeat:
+  targets:
+    - concurrent: 1
+      qps: 1
+      method: GET
+      url: health
+    - concurrent: 3
+      qps: 10
+      method: POST
+      url: v1/user
+      headers:
+        - Content-Type:application/json
+      body: >
+      	{"id": 12345}
+```
+
+Run loadbeat, using that profile as the configuration:
+
+```
+loadbeat -E loadbeat.base_urls=["http://load-test-target:8080/"] -e -c config.yml
+```
+
+### Testing limits
+
+![Example Profile Response Codes](docs/img/responses-example-profile-unbounded.png)
+
+Set QPS to 0 to let loadbeat push as much traffic as it can.
+
+### Discover
+
+loadbeat generates two types of events:
+
+  1. Results
+
+  A result captures request and response data corresponding to an individual request:
+
+  ```json
+{
+    "@timestamp": "2018-02-15T02:29:04.928Z",
+    "beat": {
+        "name": "localhost.localdomain",
+        "hostname": "localhost.localdomain",
+        "version": "7.0.0-alpha1"
+    },
+    "url": "/health",
+    "bodysize": 0,
+    "duration": 657720072,
+    "trace": {
+        "dns": 2968649,
+        "request": 2512090,
+        "response": 47751,
+        "server": 650543614,
+        "reused": false,
+        "connection": 4589713
+    },
+    "code": 200,
+    "method": "GET",
+    "complete": true
+}
+  ```
+
+  More details about HTTP tracing are available at https://blog.golang.org/http-tracing.
+
+  2. Annotations
+
+  A document is produced at the beginning of each run for each type of request that will be issued:
+
+  ```json
+{
+  "@timestamp": "2018-02-20T18:29:56.596Z",
+  "annotation": "GET http://load-test-target:8080/health - 0 (0 gz) bytes",
+  "beat": {
+      "name": "localhost",
+      "hostname": "localhost",
+      "version": "7.0.0-alpha1"
+  }
+}
+  ```
+
+  Annotations can be added to graphs created with the [time series visual builder (TSVB)](https://www.elastic.co/blog/master-time-with-kibanas-new-time-series-visual-builder).
+
+## Getting Started with Loadbeat Development
 
 Ensure that this folder is at the following location:
 `${GOPATH}/src/github.com/graphaelli/loadbeat`
-
-## Getting Started with Loadbeat
 
 ### Requirements
 
