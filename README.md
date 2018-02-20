@@ -83,13 +83,13 @@ loadbeat generates two types of events:
 
   ```json
 {
-  "@timestamp": "2018-02-20T18:29:56.596Z",
-  "annotation": "GET http://load-test-target:8080/health - 0 (0 gz) bytes",
-  "beat": {
-      "name": "localhost",
-      "hostname": "localhost",
-      "version": "7.0.0-alpha1"
-  }
+    "@timestamp": "2018-02-20T18:29:56.596Z",
+    "annotation": "GET http://load-test-target:8080/health - 0 (0 gz) bytes",
+    "beat": {
+        "name": "localhost",
+        "hostname": "localhost",
+        "version": "7.0.0-alpha1"
+    }
 }
   ```
 
