@@ -143,11 +143,6 @@ func (b *Work) runWorker(client *http.Client, n int) {
 		throttle = time.Tick(time.Duration(1e6/(b.QPS)) * time.Microsecond)
 	}
 
-	if b.DisableRedirects {
-		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}
-	}
 	for i := 0; i < n; i++ {
 		// Check if application is stopped. Do not send into a closed channel.
 		select {
@@ -176,6 +171,11 @@ func (b *Work) runWorkers() {
 	}
 	tr.TLSNextProto = make(map[string]func(string, *tls.Conn) http.RoundTripper)
 	client := &http.Client{Transport: tr, Timeout: b.Timeout}
+	if b.DisableRedirects {
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
 
 	// Ignore the case where b.N % b.C != 0.
 	for i := 0; i < b.C; i++ {
