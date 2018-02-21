@@ -14,6 +14,8 @@ import (
 	"net/http/httptrace"
 	"sync"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 const maxIdleConn = 500
@@ -194,7 +196,7 @@ func (b *Work) String() string {
 		zw.Write(b.RequestBody)
 		zw.Close()
 	}
-	return fmt.Sprintf("%s %s - %d (%d gz) bytes", b.Request.Method, b.Request.URL, len(b.RequestBody), len(gzBody.Bytes()))
+	return fmt.Sprintf("%s %s - %s (%s gz)", b.Request.Method, b.Request.URL, humanize.Bytes(uint64(len(b.RequestBody))), humanize.Bytes(uint64(len(gzBody.Bytes()))))
 }
 
 // cloneRequest returns a clone of the provided *http.Request.
