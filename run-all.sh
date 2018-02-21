@@ -1,6 +1,8 @@
 #!/bin/bash -e
 
-for profile in profiles/*mb.yml; do
+#for profile in profiles/*mb.yml; do
+for profile in $(ls -Sr profiles/*mb.yml);do
+    echo $profile
     docker restart localtesting_6.3.0-SNAPSHOT_apm-server
     sleep 60
 
