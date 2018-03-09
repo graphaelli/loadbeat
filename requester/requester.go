@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httptrace"
 	"sync"
@@ -67,9 +68,9 @@ type Work struct {
 
 // Run makes all the requests, prints the summary. It blocks until
 // all work is done.
-func (b *Work) Run() {
+func (b *Work) Run() error {
 	b.stopCh = make(chan struct{}, b.C)
-	b.runWorkers()
+	return b.runWorkers()
 }
 
 func (b *Work) Stop() {
@@ -79,7 +80,7 @@ func (b *Work) Stop() {
 	}
 }
 
-func (b *Work) makeRequest(c *http.Client) {
+func (b *Work) makeRequest(c *http.Client) error {
 	s := time.Now()
 	var size int64
 	var code int
@@ -137,9 +138,16 @@ func (b *Work) makeRequest(c *http.Client) {
 		DelayDuration: delayDuration,
 		Reused:        reused,
 	})
+	if err != nil {
+		return err
+	}
+	if code >= 300 {
+		return fmt.Errorf("received %d", code)
+	}
+	return nil
 }
 
-func (b *Work) runWorker(client *http.Client, n int) {
+func (b *Work) runWorker(client *http.Client, n int) error {
 	var throttle <-chan time.Time
 	if b.QPS > 0 {
 		throttle = time.Tick(time.Duration(1e6/(b.QPS)) * time.Microsecond)
@@ -149,17 +157,21 @@ func (b *Work) runWorker(client *http.Client, n int) {
 		// Check if application is stopped. Do not send into a closed channel.
 		select {
 		case <-b.stopCh:
-			return
+			return nil
 		default:
 			if b.QPS > 0 {
 				<-throttle
 			}
-			b.makeRequest(client)
+			if err := b.makeRequest(client); err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
 
-func (b *Work) runWorkers() {
+func (b *Work) runWorkers() error {
 	var wg sync.WaitGroup
 	wg.Add(b.C)
 
@@ -178,15 +190,20 @@ func (b *Work) runWorkers() {
 			return http.ErrUseLastResponse
 		}
 	}
-
+	var err error
 	// Ignore the case where b.N % b.C != 0.
 	for i := 0; i < b.C; i++ {
+		// jitter
+		time.Sleep(time.Duration(rand.Int63n(1000)+500) * time.Millisecond)
 		go func() {
-			b.runWorker(client, b.N/b.C)
+			if e := b.runWorker(client, b.N/b.C); e != nil {
+				err = e
+			}
 			wg.Done()
 		}()
 	}
 	wg.Wait()
+	return err
 }
 
 func (b *Work) String() string {

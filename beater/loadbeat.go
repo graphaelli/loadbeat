@@ -161,7 +161,9 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 	for _, w := range bt.work {
 		go func(w *requester.Work) {
 			bt.logger.Info("starting worker for ", w.Request.URL)
-			w.Run()
+			if err := w.Run(); err != nil {
+				bt.logger.Error("worker error for ", w.Request.URL, err)
+			}
 			wg.Done()
 		}(w)
 	}
