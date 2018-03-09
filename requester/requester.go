@@ -62,7 +62,11 @@ type Work struct {
 	DisableRedirects bool
 
 	HandleResult func(*Result)
-	stopCh       chan struct{}
+
+	// Report aggregates key stats during load generation
+	*Report
+
+	stopCh chan struct{}
 }
 
 // Run makes all the requests, prints the summary. It blocks until
@@ -124,7 +128,7 @@ func (b *Work) makeRequest(c *http.Client) {
 	t := time.Now()
 	resDuration = t.Sub(resStart)
 	finish := t.Sub(s)
-	b.HandleResult(&Result{
+	res := &Result{
 		Request:       req,
 		StatusCode:    code,
 		Duration:      finish,
@@ -136,7 +140,9 @@ func (b *Work) makeRequest(c *http.Client) {
 		ResDuration:   resDuration,
 		DelayDuration: delayDuration,
 		Reused:        reused,
-	})
+	}
+	b.HandleResult(res)
+	b.Report.Update(res)
 }
 
 func (b *Work) runWorker(client *http.Client, n int) {
