@@ -65,9 +65,9 @@ def summarize(p, include=None):
 
 def analyze(payload):
     # dump again, to clean up json formatting
-    raw = json.dumps(payload).encode('utf-8')
+    raw = json.dumps(payload, separators=(',', ':')).encode('utf-8')
     raw_gz = gzip.compress(raw)
-    print("{} in ({} gz)".format(naturalsize(len(raw)), naturalsize(len(raw_gz))))
+    print("{} ({}) in ({} ({}) gz)".format(len(raw), naturalsize(len(raw)), len(raw_gz), naturalsize(len(raw_gz))))
 
     #print("** service")
     #summarize(payload['service'])
