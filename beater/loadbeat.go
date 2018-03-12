@@ -1,6 +1,8 @@
 package beater
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net/http"
 	"strings"
@@ -46,9 +48,25 @@ func getWork(c config.Config, handleResult func(*requester.Result)) ([]*requeste
 				req.Header.Add(strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
 			}
 
+			var body []byte
+			if !c.Compression {
+				body = []byte(t.Body)
+			} else {
+				var b bytes.Buffer
+				gz := gzip.NewWriter(&b)
+				if _, err := gz.Write([]byte(t.Body)); err != nil {
+					return nil, err
+				}
+				if err := gz.Close(); err != nil {
+					return nil, err
+				}
+				body = b.Bytes()
+				req.Header.Add("Content-Encoding", "gzip")
+			}
+
 			w := &requester.Work{
 				Request:     req,
-				RequestBody: []byte(t.Body), // TODO: support other body types
+				RequestBody: body,
 
 				DisableCompression: !c.Compression,
 				DisableKeepAlives:  !c.Keepalives,
