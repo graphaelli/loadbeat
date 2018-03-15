@@ -44,6 +44,11 @@ func sortedTotal(m map[int]int) ([]int, int) {
 }
 
 func (r *Report) Summarize(w io.Writer) {
+	r.Lock()
+	defer r.Unlock()
+	if r.last.IsZero() {
+		r.last = time.Now()
+	}
 	codes, total := sortedTotal(r.statusCodeDist)
 	div := float64(total)
 	for _, code := range codes {
@@ -51,5 +56,5 @@ func (r *Report) Summarize(w io.Writer) {
 		fmt.Fprintf(w, "  [%d]\t%d responses (%.2f%%) \n", code, cnt, 100*float64(cnt)/div)
 	}
 	dur := r.last.Sub(r.first)
-	fmt.Fprintf(w, "  total\t%d responses (%.2f rps)\n", total, div/dur.Seconds())
+	fmt.Fprintf(w, "  total\t%d responses (%.2f rps) in %s [%s-%s]\n", total, div/dur.Seconds(), dur, r.first, r.last)
 }
