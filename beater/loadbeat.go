@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -90,6 +91,7 @@ func getWork(c config.Config, handleResult func(*requester.Result)) ([]*requeste
 				Timeout:            c.RequestTimeout,
 
 				HandleResult: handleResult,
+				Report:       requester.NewReport(),
 			}
 			work = append(work, w)
 		}
@@ -209,6 +211,12 @@ func (bt *Loadbeat) Run(b *beat.Beat) error {
 		bt.Stop()
 		<-bt.done
 	}
+
+	for _, w := range bt.work {
+		fmt.Println(w.Request.URL)
+		w.Report.Summarize(os.Stdout)
+	}
+
 	return nil
 }
 
