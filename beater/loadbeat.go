@@ -30,6 +30,17 @@ type Loadbeat struct {
 	stopping bool
 }
 
+func addHeaders(req *http.Request, headers []string) error {
+	for _, header := range headers {
+		parts := strings.SplitN(header, ":", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf("bad header %q", header)
+		}
+		req.Header.Add(strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
+	}
+	return nil
+}
+
 func getWork(c config.Config, handleResult func(*requester.Result)) ([]*requester.Work, error) {
 	var work []*requester.Work
 	for _, baseUrl := range c.BaseUrls {
@@ -40,12 +51,14 @@ func getWork(c config.Config, handleResult func(*requester.Result)) ([]*requeste
 				panic(err)
 			}
 
-			for _, header := range t.Headers {
-				parts := strings.SplitN(header, ":", 2)
-				if len(parts) != 2 {
-					return nil, fmt.Errorf("bad header config in %s %s: %s", t.Method, t.Url, header)
-				}
-				req.Header.Add(strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
+			// add global headers
+			if err := addHeaders(req, c.Headers); err != nil {
+				return nil, err
+			}
+
+			// add target headers
+			if err := addHeaders(req, t.Headers); err != nil {
+				return nil, errors.Wrapf(err, "while adding headers for target %s %s", t.Method, t.Url)
 			}
 
 			var body []byte
