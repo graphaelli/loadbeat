@@ -15,3 +15,6 @@ loadbeat:
   # How long to wait for a response for each request
   #request_timeout: 5s
 
+  # Headers added to every request
+  #headers:
+  #  - "set-cookie: ABC=; expires=Mon, 01-Jan-1990 00:00:00 GMT; path=/; domain=.example.com"

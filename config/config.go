@@ -14,6 +14,7 @@ type Config struct {
 	Keepalives     bool          `config:"keepalives.enabled"`
 	Redirects      bool          `config:"redirects.enabled"`
 	RequestTimeout time.Duration `config:"request_timeout"`
+	Headers        []string      `config:"headers"`
 
 	// Work Config
 	BaseUrls    []string       `config:"base_urls"`
@@ -37,6 +38,7 @@ var DefaultConfig = Config{
 	Keepalives:     true,
 	Redirects:      true,
 	RequestTimeout: 5 * time.Second,
+	Headers:        []string{},
 
 	BaseUrls:    []string{"http://apm-server:8200/"},
 	MaxRequests: math.MaxInt32,
